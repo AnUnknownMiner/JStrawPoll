@@ -90,14 +90,15 @@ public class JStrawPoll {
 	}
 	
 	/**
+	 * Builds the raw JSON output for your own manipulation.
 	 * 
-	 * @return
-	 * @throws MalformedURLException
-	 * @throws IOException
+	 * @return - The raw JSON output from strawpoll.me 
+	 * @throws MalformedURLException - The URL was incorrect.
+	 * @throws IOException - Something else happened trying to communicate with strawpoll.me.
 	 */
 	
 	@SuppressWarnings("unchecked")
-	public String buildForRaw() throws MalformedURLException, IOException {
+	public String buildForRawJSON() throws MalformedURLException, IOException {
 		
 		obj.put("title", this.titlePoll);
 		obj.put("multi", this.multiPoll);
@@ -140,7 +141,50 @@ public class JStrawPoll {
 		
 	}
 	
-	public String buildForID() {
+	/**
+	 * Builds the URL and returns the ID of the created poll ONLY.
+	 * 
+	 * @return - The ID of the poll created.
+	 * @throws IOException 
+	 */
+	@SuppressWarnings("unchecked")
+	public String buildForPollID() throws IOException {
+		
+		obj.put("title", this.titlePoll);
+		obj.put("multi", this.multiPoll);
+		obj.put("captcha", this.captchaPoll);
+		obj.put("dupcheck", this.dupcheck.getDupCheck());
+		obj.put("options", arr);
+		
+		String urlS = obj.toString();
+		
+		HttpURLConnection c = (HttpURLConnection) (new URL("http://strawpoll.me/api/v2/polls").openConnection());
+
+		c.setRequestMethod("POST");
+		c.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+		c.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 5.1; rv:19.0) Gecko/20100101 Firefox/19.0");
+		c.setRequestProperty("Content-Length", Integer.toString(urlS.length()));
+
+		c.setDoOutput(true);
+		c.setDoInput(true);
+		c.setUseCaches(false);
+		
+		DataOutputStream wr = new DataOutputStream(c.getOutputStream());
+		wr.writeBytes(urlS);
+
+		wr.flush();
+		wr.close();
+
+		InputStream data = null;
+		try {
+			data = c.getInputStream();
+		} catch (Exception e) {
+			e.printStackTrace();
+			data = c.getErrorStream();
+		}
+
+		BufferedReader b = new BufferedReader(new InputStreamReader(data));
+		
 		return "";
 	}
 }
